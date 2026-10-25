@@ -1,0 +1,269 @@
+$(document).ready(function(){
+	document.addEventListener('contextmenu', event => event.preventDefault());
+	
+	$('.table-responsive', '.editor').table({
+		className: 'table-responsive-wrapper',
+		width: 768		
+	});
+	
+	$(".menu-btn").on('click',function(){
+		let menu = $(".menu-box-c");
+		if(menu.hasClass('expanded')){
+			$("html").css('overflow-y','scroll');
+			menu.removeClass('expanded');
+		} else {
+			$("html").css('overflow-y','hidden');
+			menu.addClass('expanded');
+		}
+	});
+	$("#menu-btn-close").on('click',function(){
+		// $('header').fadeIn();
+		$('footer').show();
+		$('.menu-box-c').removeClass('expanded');
+		$('#content').css({'max-height':'unset','overflow':'unset'});
+		if($('body.animating').length == 0){
+			$('html').css({'overflow-y':'scroll'});
+		}
+	});
+	if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+		$('.to-top-c').css('margin-right','15px');
+	} else {
+		$('.to-top-c').css('margin-right','0px');
+	}
+	$('.to-top').click(function(){
+		$('html').animate({
+			scrollTop: 0
+		});
+	});
+	var w = $('.menu').outerWidth(true) + 1;
+	var render = function() {
+		if($('html').scrollTop() < 100){
+			$('.to-top').fadeOut('fast'); 
+			// $('header').removeClass('scrolled');
+		}else{
+			$('.to-top').fadeIn('slow'); 
+			// $('header').addClass('scrolled');
+		}
+		var offset = 106 ;
+		if(window.innerWidth < 767)offset = 76;
+		else if(window.innerWidth < 1199)offset = 90;
+		if($('footer').length > 0){
+			top = $('footer').offset().top;
+		}else {
+			top = 0;
+		}
+		if($('html').scrollTop()+$(window).height() >  $('footer').offset().top + ($('.to-top-c').height() / 2 )+ offset ){
+			$('.to-top-c').removeClass('floating');
+			
+		} else {
+			$('.to-top-c').addClass('floating');
+		}
+
+		// if(($('html').scrollTop() > $("header").height()) && !$("header").hasClass('sticky')){
+		// 	$("header").addClass('sticky');
+		// } else if(($('html').scrollTop() <= $("header").height()) && $("header").hasClass('sticky')){
+		// 	$("header").removeClass('sticky');
+		// }
+	};
+	$(window).on('scroll resize touchmove', render);
+	render();
+});
+$('body, html').on('click', 'a[href="#"]', function(e){
+	e.preventDefault();
+})
+
+function disableScroll(snap= false) {
+	// Get the current page scroll position
+	$('html').addClass('noscroll');
+	/* $('header a.menu').css('right', '45px') */
+	$('html').css('padding-right', getScrollbarWidth());
+	$('header').css('max-width', 'calc(100% - '+getScrollbarWidth()+'px)');
+	/* $('header').css('padding-right', getScrollbarWidth()); */
+	/* $('.pulldown').css('padding-right', getScrollbarWidth()); */
+	/* $('header').css('padding-right', getScrollbarWidth());
+	$('html').css('max-width', 1904+getScrollbarWidth()+'px');
+	$('header').css('max-width', 1904+getScrollbarWidth()+'px'); */
+	/* $('header_fix').css('padding-right', getScrollbarWidth());
+	$('header_fix .background').css('left', -(getScrollbarWidth())); */
+	scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+	scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+	if(!snap){
+		// if any scroll is attempted, set this to the previous value
+		window.onscroll = function(e) {
+			e.preventDefault();
+			$('html, body').animate({scrollTop: scrollTop},0)
+		};
+	}
+}
+$(window).on('load', function(){
+	if(!$('html').hasClass('loaded')){
+		setTimeout(function(){
+			$('html').addClass('loaded');
+			/* $('.loading_overlay').remove(); */
+			$(window).trigger('load');
+		}, 500)
+	}
+})
+function enableScroll() {
+	$('html').removeClass('noscroll');
+	/* $('header a.menu').css('right', ''); */
+	$('html').css('padding-right', '');
+	$('html').css('max-width', '');
+	/* $('header').css('padding-right', ''); */
+	$('header').css('max-width', '');
+	$('#content').css('top', '');
+	$('.pulldown').css('padding-right', '');
+	window.onscroll = function() {};
+}
+
+
+function getScrollbarWidth() {
+
+	// Creating invisible container
+	const outer = document.createElement('div');
+	outer.style.visibility = 'hidden';
+	outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+	outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+	outer.style.position = 'absolute';
+	outer.style.top = '0';
+	outer.style.left = '0';
+	outer.style.width = '100%';
+	
+	document.body.appendChild(outer);
+
+	// Creating inner element and placing it in the container
+	const inner = document.createElement('div');
+	outer.appendChild(inner);
+	//console.log(outer.offsetWidth , inner.offsetWidth);
+
+	// Calculating difference between container's full width and the child width
+	const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+	// Removing temporary elements from the DOM
+	outer.parentNode.removeChild(outer);
+
+	return scrollbarWidth;
+
+}
+
+
+var scrolled = 0;
+function scrollHandler(blockScroll){
+	
+	if(blockScroll){
+		$('html').css({'overflow-y':'hidden', 'padding-right':getScrollbarWidth()});
+		$('body').css({'overflow-y':'hidden'});
+		$('#content').css({top:'-'+(scrolled)+'px'});
+		// $('header').hide();		
+	} else {
+		$('html').css({'overflow-y':'scroll', 'padding-right': 0});
+		$('body').css({'overflow-y':'unset'});
+		$('#content').css({top:0+'px'});
+		$(window).scrollTop(scrolled);
+		// $('header').show();
+	}
+}
+
+function scrollAnimate() {
+	var top = $(window).scrollTop() + $(window).height();
+	
+	$('.animate:not(.animated):not(.delay_animated)').each(function(){
+		var self = $(this);
+		var target = self.offset().top + 20;
+		var offset = parseFloat(self.data('offset')) || 0;
+		var delay = parseFloat(self.data('delay')) || 0;
+		var instand = self.data('instand');
+		var func = self.data('func');
+		
+		if(!offset) {
+			offset = self.height() * 0.4;
+			if(offset > 100) {
+				offset = 100;
+			}
+		}
+		
+		if(offset) {
+			target += offset;
+		}
+		if(top >= target) {
+			if(self.parent().hasClass('animate_group')) {
+				var parent = self.parent();
+				self.addClass('delay_animated');
+				
+				if(!parent.find('.animate:not(.delay_animated)').length) {
+					parent.find('.animate').removeClass('delay_animated');
+					parent.removeClass('animate_group');
+				}
+				
+				return;
+			}
+			
+			if(delay > 0) {
+				
+				self.addClass('delay_animated');
+				setTimeout(function(){
+					self.removeClass('delay_animated').addClass('animated');
+					if(typeof window[func] == 'function') {
+						window[func](self);
+					}
+					
+					if(self.hasClass('num')){
+						setTimeout(
+							function() 
+							{
+							numberAnimation(self);
+						}, instand == true ? 100 : 1000);
+					}
+				}, delay * 1000);
+			}
+			else {
+				self.addClass('animated');
+				
+				if(self.hasClass('num')){
+					setTimeout(
+						function() 
+						{
+						numberAnimation(self);
+					}, instand == true ? 100 : 1000);
+				}
+
+				if(typeof window[func] == 'function') {
+					window[func](self);
+				}
+			}
+		}
+	});
+}
+
+function numberAnimation(self){
+	
+	self.each(function () {
+		$(this)
+			.prop("Counter", 0)
+			.animate(
+			{
+				Counter: $(this).data('target'),
+			},
+			{
+				duration: 2500,
+				easing:"swing",
+				step:function (now) {
+					
+					if($(this).hasClass('no_comma')){
+						now = Math.ceil(now);
+					} else {
+						now = Number(Math.ceil(now)).toLocaleString('en');
+					}
+					if($(this).hasClass('plus')){
+						now = now + '+';
+					}
+					$(this).text(now);
+				},
+				done:function(a,j){
+					$(this).addClass('end')
+				}
+			}
+		);
+	});
+}
